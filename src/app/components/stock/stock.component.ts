@@ -16,7 +16,7 @@ export class StockComponent implements OnInit {
 
   items: StockItem[] = [];
   filteredItems: StockItem[] = [];
-  categories = ['Cuisine', 'Entretien', 'Autre'];
+  categories = ['Cuisine', 'Hygiène', 'Entretien', 'Autre'];
   
   searchTerm = '';
   filterCategory = 'all';
