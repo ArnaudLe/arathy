@@ -266,20 +266,6 @@
   }
 }
 
-/* Animation spéciale pour les cartes */
-@keyframes cardPulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.02);
-  }
-}
-
-.event-card:active {
-  animation: cardPulse 0.3s ease-in-out;
-}
-
 /* Prochain anniversaire */
 .anniversary-info {
   margin-top: 1.5rem;
