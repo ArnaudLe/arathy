@@ -163,4 +163,8 @@ export class DateCalculatorComponent implements OnInit {
   getTodayDate(): string {
     return new Date().toISOString().split('T')[0];
   }
+
+  getNextAnniversary(event: DateEvent): { date: Date; daysUntil: number; text: string } {
+    return this.dateService.getNextAnniversary(event.period1Start);
+  }
 }

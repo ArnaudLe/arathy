@@ -97,4 +97,42 @@ export class DateService {
       totalDays
     };
   }
+
+  getNextAnniversary(startDate: string): { date: Date; daysUntil: number; text: string } {
+    const start = new Date(startDate);
+    const today = new Date();
+
+    // Date d'anniversaire cette année
+    let nextAnniversary = new Date(
+        today.getFullYear(),
+        start.getMonth(),
+        start.getDate()
+    );
+
+    // Si l'anniversaire est déjà passé cette année, prendre l'année prochaine
+    if (nextAnniversary < today) {
+      nextAnniversary = new Date(
+          today.getFullYear() + 1,
+          start.getMonth(),
+          start.getDate()
+      );
+    }
+
+    // Calculer le nombre de jours jusqu'à l'anniversaire
+    const diffMs = nextAnniversary.getTime() - today.getTime();
+    const daysUntil = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+    // Texte formaté
+    const dateText = nextAnniversary.toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+
+    return {
+      date: nextAnniversary,
+      daysUntil,
+      text: dateText
+    };
+  }
 }
