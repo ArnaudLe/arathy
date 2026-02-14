@@ -1,151 +1,167 @@
 <div class="dates-container">
-  <!-- En-tête -->
-  <div class="card header-card">
-    <div class="header-actions">
-      <h2 class="section-title">📅 Calculateur de Dates</h2>
-      <button class="btn btn-primary" (click)="openAddForm()">
-        ➕ Ajouter un événement
-      </button>
-    </div>
-    <p class="subtitle">Suivez vos événements importants et calculez le temps écoulé</p>
-  </div>
-
-  <!-- Formulaire d'ajout/édition -->
-  <div class="card form-card" *ngIf="showAddForm">
-    <h3 class="form-title">{{ editingEvent ? '✏️ Modifier l\'événement' : '➕ Nouvel événement' }}</h3>
-    
-    <form (ngSubmit)="saveEvent()">
-      <div class="form-group">
-        <label class="label">Titre de l'événement</label>
-        <input 
-          type="text" 
-          class="input" 
-          [(ngModel)]="formData.title"
-          name="title"
-          placeholder="Ex: Notre rencontre, Déménagement..."
-          required>
-      </div>
-
-      <div class="form-group">
-        <label class="label">Date de début</label>
-        <input 
-          type="date" 
-          class="input" 
-          [(ngModel)]="formData.startDate"
-          name="startDate"
-          [max]="getTodayDate()"
-          required>
-      </div>
-
-      <div class="form-group toggle-group">
-        <label class="toggle">
-          <input 
-            type="checkbox" 
-            [(ngModel)]="formData.useTwoPeriods"
-            name="useTwoPeriods"
-            (change)="onToggleChange()">
-          <span class="toggle-slider"></span>
-        </label>
-        <label class="toggle-label">Calculer sur 2 périodes (date de début à date de fin)</label>
-      </div>
-
-      <div class="form-group" *ngIf="formData.useTwoPeriods">
-        <label class="label">Date de fin</label>
-        <input 
-          type="date" 
-          class="input" 
-          [(ngModel)]="formData.endDate"
-          name="endDate"
-          [min]="formData.startDate"
-          [max]="getTodayDate()"
-          [required]="formData.useTwoPeriods">
-        <small class="form-hint">Si non renseignée, la date du jour sera utilisée</small>
-      </div>
-
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary">
-          {{ editingEvent ? '💾 Modifier' : '➕ Ajouter' }}
-        </button>
-        <button type="button" class="btn btn-secondary" (click)="closeForm()">
-          ❌ Annuler
-        </button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Liste des événements en cartes -->
-  <div class="events-grid" *ngIf="events.length > 0">
-    <div 
-      *ngFor="let event of events; let i = index" 
-      class="event-card"
-      [style.background]="getEventColor(i)">
-      
-      <div class="event-content">
-        <div class="event-header">
-          <h3 class="event-title">{{ event.title }}</h3>
-          <div class="event-actions">
-            <button class="icon-btn-white" (click)="openEditForm(event)" title="Modifier">
-              ✏️
+    <!-- En-tête -->
+    <div class="card header-card">
+        <div class="header-actions">
+            <h2 class="section-title">📅 Calculateur de Dates</h2>
+            <button class="btn btn-primary" (click)="openAddForm()">
+                ➕ Ajouter un événement
             </button>
-            <button class="icon-btn-white" (click)="deleteEvent(event)" title="Supprimer">
-              🗑️
-            </button>
-          </div>
         </div>
-
-        <div class="event-date-info">
-          <div class="date-badge">
-            📅 {{ formatDate(event.startDate) }}
-            <span *ngIf="event.useTwoPeriods && event.endDate"> → {{ formatDate(event.endDate) }}</span>
-            <span *ngIf="event.useTwoPeriods && !event.endDate"> → Aujourd'hui</span>
-          </div>
-        </div>
-
-        <div class="calculation-display">
-          <ng-container *ngIf="calculateDate(event) as calc">
-            <div class="calc-row">
-              <div class="calc-item">
-                <div class="calc-value">{{ calc.years }}</div>
-                <div class="calc-label">{{ calc.years > 1 ? 'ans' : 'an' }}</div>
-              </div>
-              <div class="calc-separator">·</div>
-              <div class="calc-item">
-                <div class="calc-value">{{ calc.months }}</div>
-                <div class="calc-label">mois</div>
-              </div>
-              <div class="calc-separator">·</div>
-              <div class="calc-item">
-                <div class="calc-value">{{ calc.days }}</div>
-                <div class="calc-label">{{ calc.days > 1 ? 'jours' : 'jour' }}</div>
-              </div>
-            </div>
-            <div class="total-days">
-              <strong>{{ calc.totalDays }}</strong> {{ calc.totalDays > 1 ? 'jours' : 'jour' }} au total
-            </div>
-          </ng-container>
-        </div>
-      </div>
+        <p class="subtitle">Suivez vos événements importants et calculez le temps écoulé</p>
     </div>
-  </div>
 
-  <!-- État vide -->
-  <div class="card empty-state" *ngIf="events.length === 0">
-    <div class="empty-icon">📅</div>
-    <h3>Aucun événement enregistré</h3>
-    <p>Commencez par ajouter votre premier événement pour suivre le temps écoulé</p>
-    <button class="btn btn-primary" (click)="openAddForm()" style="margin-top: 1rem;">
-      ➕ Ajouter un événement
-    </button>
-  </div>
+    <!-- Formulaire d'ajout/édition -->
+    <div class="card form-card" *ngIf="showAddForm">
+        <h3 class="form-title">{{ editingEvent ? '✏️ Modifier l\'événement' : '➕ Nouvel événement' }}</h3>
 
-  <!-- Info -->
-  <div class="card info-card" *ngIf="events.length > 0">
-    <div class="info-content">
-      <span class="info-icon">💡</span>
-      <div>
-        <strong>Astuce :</strong> Activez le toggle "2 périodes" pour calculer entre deux dates spécifiques. 
-        Sinon, le calcul se fait automatiquement de la date de début jusqu'à aujourd'hui.
-      </div>
+        <form (ngSubmit)="saveEvent()">
+            <div class="form-group">
+                <label class="label">Titre de l'événement</label>
+                <input
+                        type="text"
+                        class="input"
+                        [(ngModel)]="formData.title"
+                        name="title"
+                        placeholder="Ex: Notre rencontre, Déménagement..."
+                        required>
+            </div>
+
+            <div class="form-group">
+                <label class="label">Période 1 - Date de début</label>
+                <input
+                        type="date"
+                        class="input"
+                        [(ngModel)]="formData.period1Start"
+                        name="period1Start"
+                        [max]="getTodayDate()"
+                        required>
+            </div>
+
+            <div class="form-group toggle-group">
+                <label class="toggle">
+                    <input
+                            type="checkbox"
+                            [(ngModel)]="formData.useTwoPeriods"
+                            name="useTwoPeriods"
+                            (change)="onToggleChange()">
+                    <span class="toggle-slider"></span>
+                </label>
+                <label class="toggle-label">Calculer sur 2 périodes distinctes</label>
+            </div>
+
+            <div *ngIf="formData.useTwoPeriods">
+                <div class="form-group">
+                    <label class="label">Période 1 - Date de fin</label>
+                    <input
+                            type="date"
+                            class="input"
+                            [(ngModel)]="formData.period1End"
+                            name="period1End"
+                            [min]="formData.period1Start"
+                            [max]="getTodayDate()"
+                            [required]="formData.useTwoPeriods">
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Période 2 - Date de début (jusqu'à aujourd'hui)</label>
+                    <input
+                            type="date"
+                            class="input"
+                            [(ngModel)]="formData.period2Start"
+                            name="period2Start"
+                            [min]="formData.period1End"
+                            [max]="getTodayDate()"
+                            [required]="formData.useTwoPeriods">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    {{ editingEvent ? '💾 Modifier' : '➕ Ajouter' }}
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="closeForm()">
+                    ❌ Annuler
+                </button>
+            </div>
+        </form>
     </div>
-  </div>
+
+    <!-- Liste des événements en cartes -->
+    <div class="events-grid" *ngIf="events.length > 0">
+        <div
+                *ngFor="let event of events; let i = index"
+                class="event-card"
+                [style.background]="getEventColor(i)">
+
+            <div class="event-content">
+                <div class="event-header">
+                    <h3 class="event-title">{{ event.title }}</h3>
+                    <div class="event-actions">
+                        <button class="icon-btn-white" (click)="openEditForm(event)" title="Modifier">
+                            ✏️
+                        </button>
+                        <button class="icon-btn-white" (click)="deleteEvent(event)" title="Supprimer">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+
+                <div class="event-date-info">
+                    <div class="date-badge" *ngIf="!event.useTwoPeriods">
+                        📅 {{ formatDate(event.period1Start) }} → Aujourd'hui
+                    </div>
+                    <div class="date-badge" *ngIf="event.useTwoPeriods">
+                        📅 Période 1: {{ formatDate(event.period1Start) }} → {{ formatDate(event.period1End!) }}<br>
+                        📅 Période 2: {{ formatDate(event.period2Start!) }} → Aujourd'hui
+                    </div>
+                </div>
+
+                <div class="calculation-display">
+                    <ng-container *ngIf="calculateDate(event) as calc">
+                        <div class="calc-row">
+                            <div class="calc-item">
+                                <div class="calc-value">{{ calc.years }}</div>
+                                <div class="calc-label">{{ calc.years > 1 ? 'ans' : 'an' }}</div>
+                            </div>
+                            <div class="calc-separator">·</div>
+                            <div class="calc-item">
+                                <div class="calc-value">{{ calc.months }}</div>
+                                <div class="calc-label">mois</div>
+                            </div>
+                            <div class="calc-separator">·</div>
+                            <div class="calc-item">
+                                <div class="calc-value">{{ calc.days }}</div>
+                                <div class="calc-label">{{ calc.days > 1 ? 'jours' : 'jour' }}</div>
+                            </div>
+                        </div>
+                        <div class="total-days">
+                            <strong>{{ calc.totalDays }}</strong> {{ calc.totalDays > 1 ? 'jours' : 'jour' }} au total
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- État vide -->
+    <div class="card empty-state" *ngIf="events.length === 0">
+        <div class="empty-icon">📅</div>
+        <h3>Aucun événement enregistré</h3>
+        <p>Commencez par ajouter votre premier événement pour suivre le temps écoulé</p>
+        <button class="btn btn-primary" (click)="openAddForm()" style="margin-top: 1rem;">
+            ➕ Ajouter un événement
+        </button>
+    </div>
+
+    <!-- Info -->
+    <div class="card info-card" *ngIf="events.length > 0">
+        <div class="info-content">
+            <span class="info-icon">💡</span>
+            <div>
+                <strong>Astuce :</strong> Activez le toggle "2 périodes" pour calculer deux périodes séparées.
+                Par exemple : période 1 (janvier 2011 → novembre 2011) + période 2 (janvier 2016 → aujourd'hui).
+                Le total affiché cumule les deux périodes.
+            </div>
+        </div>
+    </div>
 </div>

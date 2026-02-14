@@ -20,8 +20,9 @@ export class DateCalculatorComponent implements OnInit {
 
   formData: Omit<DateEvent, 'id'> = {
     title: '',
-    startDate: '',
-    endDate: '',
+    period1Start: '',
+    period1End: '',
+    period2Start: '',
     useTwoPeriods: false
   };
 
@@ -42,8 +43,9 @@ export class DateCalculatorComponent implements OnInit {
     this.editingEvent = event;
     this.formData = {
       title: event.title,
-      startDate: event.startDate,
-      endDate: event.endDate || '',
+      period1Start: event.period1Start,
+      period1End: event.period1End || '',
+      period2Start: event.period2Start || '',
       useTwoPeriods: event.useTwoPeriods
     };
   }
@@ -57,34 +59,48 @@ export class DateCalculatorComponent implements OnInit {
   resetForm(): void {
     this.formData = {
       title: '',
-      startDate: '',
-      endDate: '',
+      period1Start: '',
+      period1End: '',
+      period2Start: '',
       useTwoPeriods: false
     };
   }
 
   onToggleChange(): void {
     if (!this.formData.useTwoPeriods) {
-      this.formData.endDate = '';
+      this.formData.period1End = '';
+      this.formData.period2Start = '';
     }
   }
 
   async saveEvent(): Promise<void> {
-    if (!this.formData.title.trim() || !this.formData.startDate) {
+    if (!this.formData.title.trim() || !this.formData.period1Start) {
       alert('Veuillez remplir tous les champs obligatoires');
       return;
     }
 
-    if (this.formData.useTwoPeriods && !this.formData.endDate) {
-      alert('Veuillez entrer une date de fin');
+    if (this.formData.useTwoPeriods && (!this.formData.period1End || !this.formData.period2Start)) {
+      alert('Veuillez remplir les dates des 2 périodes');
       return;
     }
 
     try {
-      const eventData = {
-        ...this.formData,
-        endDate: this.formData.useTwoPeriods ? this.formData.endDate : undefined
+      // Créer l'objet sans propriétés undefined
+      const eventData: any = {
+        title: this.formData.title,
+        period1Start: this.formData.period1Start,
+        useTwoPeriods: this.formData.useTwoPeriods
       };
+
+      // Ajouter les dates optionnelles seulement si présentes
+      if (this.formData.useTwoPeriods) {
+        if (this.formData.period1End) {
+          eventData.period1End = this.formData.period1End;
+        }
+        if (this.formData.period2Start) {
+          eventData.period2Start = this.formData.period2Start;
+        }
+      }
 
       if (this.editingEvent?.id) {
         await this.dateService.updateEvent(this.editingEvent.id, eventData);
@@ -112,7 +128,15 @@ export class DateCalculatorComponent implements OnInit {
   }
 
   calculateDate(event: DateEvent): DateCalculation {
-    return this.dateService.calculateDifference(event.startDate, event.endDate);
+    if (event.useTwoPeriods && event.period1End) {
+      return this.dateService.calculateTotalPeriods(
+          event.period1Start,
+          event.period1End,
+          event.period2Start
+      );
+    }
+    // Mode simple : période 1 start → aujourd'hui
+    return this.dateService.calculateDifference(event.period1Start);
   }
 
   getEventColor(index: number): string {
@@ -129,10 +153,10 @@ export class DateCalculatorComponent implements OnInit {
 
   formatDate(dateString: string): string {
     const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', { 
-      day: 'numeric', 
-      month: 'long', 
-      year: 'numeric' 
+    return date.toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
     });
   }
 

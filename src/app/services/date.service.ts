@@ -64,4 +64,37 @@ export class DateService {
       totalDays
     };
   }
+
+  calculateTotalPeriods(
+      period1Start: string,
+      period1End: string,
+      period2Start?: string
+  ): DateCalculation {
+    // Période 1
+    const calc1 = this.calculateDifference(period1Start, period1End);
+
+    // Si pas de période 2, retourner juste période 1
+    if (!period2Start) {
+      return calc1;
+    }
+
+    // Période 2 (de period2Start à aujourd'hui)
+    const calc2 = this.calculateDifference(period2Start);
+
+    // Additionner les jours
+    const totalDays = calc1.totalDays + calc2.totalDays;
+
+    // Calculer années/mois/jours du total
+    const years = Math.floor(totalDays / 365);
+    const remainingDays = totalDays % 365;
+    const months = Math.floor(remainingDays / 30);
+    const days = remainingDays % 30;
+
+    return {
+      years,
+      months,
+      days,
+      totalDays
+    };
+  }
 }

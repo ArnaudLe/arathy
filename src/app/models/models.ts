@@ -12,8 +12,9 @@ export interface StockItem {
 export interface DateEvent {
   id?: string;
   title: string;
-  startDate: string;
-  endDate?: string;
+  period1Start: string;
+  period1End?: string;
+  period2Start?: string;  // Nouvelle période optionnelle
   useTwoPeriods: boolean;
   createdAt?: string;
 }
