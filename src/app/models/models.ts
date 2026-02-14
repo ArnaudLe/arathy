@@ -5,6 +5,7 @@ export interface StockItem {
   unit: string;
   category: string;
   alertThreshold: number;
+  notes?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -14,7 +15,7 @@ export interface DateEvent {
   title: string;
   period1Start: string;
   period1End?: string;
-  period2Start?: string;  // Nouvelle période optionnelle
+  period2Start?: string;
   useTwoPeriods: boolean;
   createdAt?: string;
 }

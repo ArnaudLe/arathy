@@ -283,6 +283,43 @@
   color: var(--text-light);
 }
 
+/* Champ notes dans le formulaire */
+.full-width {
+  grid-column: 1 / -1;
+}
+
+textarea.input {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+/* Affichage des notes dans la carte */
+.item-notes {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  border-left: 3px solid #667eea;
+}
+
+.notes-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #667eea;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.notes-content {
+  color: #4b5563;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .filters {

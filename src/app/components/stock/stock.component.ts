@@ -1,5 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, ViewChild, ElementRef, AfterViewInit } from '@angular/core';import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StockService } from '../../services/stock.service';
 import { StockItem } from '../../models/models';
@@ -12,6 +11,7 @@ import { StockItem } from '../../models/models';
   styleUrls: ['./stock.component.css']
 })
 export class StockComponent implements OnInit {
+  @ViewChild('nameInput') nameInput!: ElementRef;
   private stockService = inject(StockService);
 
   items: StockItem[] = [];
@@ -22,13 +22,14 @@ export class StockComponent implements OnInit {
   filterCategory = 'all';
   showAddForm = false;
   editingItem: StockItem | null = null;
-  
+
   formData: Omit<StockItem, 'id'> = {
     name: '',
     quantity: 0,
     unit: 'unité(s)',
     category: 'Cuisine',
-    alertThreshold: 2
+    alertThreshold: 2,
+    notes: ''
   };
 
   ngOnInit(): void {
@@ -73,6 +74,7 @@ export class StockComponent implements OnInit {
     this.showAddForm = true;
     this.editingItem = null;
     this.resetForm();
+    this.focusNameInput();
   }
 
   openEditForm(item: StockItem): void {
@@ -83,8 +85,10 @@ export class StockComponent implements OnInit {
       quantity: item.quantity,
       unit: item.unit,
       category: item.category,
-      alertThreshold: item.alertThreshold
+      alertThreshold: item.alertThreshold,
+      notes: item.notes || ''
     };
+    this.focusNameInput();
   }
 
   closeForm(): void {
@@ -99,7 +103,8 @@ export class StockComponent implements OnInit {
       quantity: 0,
       unit: 'unité(s)',
       category: 'Cuisine',
-      alertThreshold: 2
+      alertThreshold: 2,
+      notes: ''
     };
   }
 
@@ -145,5 +150,14 @@ export class StockComponent implements OnInit {
         alert('Erreur lors de la suppression');
       }
     }
+  }
+
+  private focusNameInput(): void {
+    // Petit délai pour laisser le DOM se mettre à jour
+    setTimeout(() => {
+      if (this.nameInput) {
+        this.nameInput.nativeElement.focus();
+      }
+    }, 100);
   }
 }

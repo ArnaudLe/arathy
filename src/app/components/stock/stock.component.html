@@ -1,188 +1,205 @@
 <div class="stock-container">
-  <!-- En-tête avec recherche et filtres -->
-  <div class="card header-card">
-    <div class="header-actions">
-      <h2 class="section-title">📦 Gestion du Stock</h2>
-      <button class="btn btn-primary" (click)="openAddForm()">
-        ➕ Ajouter un article
-      </button>
+    <!-- En-tête avec recherche et filtres -->
+    <div class="card header-card">
+        <div class="header-actions">
+            <h2 class="section-title">📦 Gestion du Stock</h2>
+            <button class="btn btn-primary" (click)="openAddForm()">
+                ➕ Ajouter un article
+            </button>
+        </div>
+
+        <!-- Alertes stock faible -->
+        <div class="alert alert-warning" *ngIf="lowStockItems.length > 0">
+            <span class="alert-icon">⚠️</span>
+            <div>
+                <strong>Stock faible :</strong>
+                {{ lowStockItemNames }}
+            </div>
+        </div>
+
+        <!-- Recherche et filtres -->
+        <div class="filters">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input
+                        type="text"
+                        class="input search-input"
+                        placeholder="Rechercher un article..."
+                        [(ngModel)]="searchTerm"
+                        (ngModelChange)="onSearchChange()">
+            </div>
+            <select
+                    class="input filter-select"
+                    [(ngModel)]="filterCategory"
+                    (ngModelChange)="onCategoryChange()">
+                <option value="all">Toutes les catégories</option>
+                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+            </select>
+        </div>
     </div>
 
-    <!-- Alertes stock faible -->
-    <div class="alert alert-warning" *ngIf="lowStockItems.length > 0">
-      <span class="alert-icon">⚠️</span>
-      <div>
-        <strong>Stock faible :</strong>
-        {{ lowStockItemNames }}
-      </div>
+    <!-- Formulaire d'ajout/édition -->
+    <div class="card form-card" *ngIf="showAddForm">
+        <h3 class="form-title">{{ editingItem ? '✏️ Modifier' : '➕ Nouvel article' }}</h3>
+
+        <form (ngSubmit)="saveItem()">
+            <div class="grid grid-cols-2">
+                <div class="form-group">
+                    <label class="label">Nom</label>
+                    <input
+                        #nameInput
+                        type="text"
+                        class="input"
+                        [(ngModel)]="formData.name"
+                        name="name"
+                        placeholder="Ex: Papier toilette"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Catégorie</label>
+                    <select class="input" [(ngModel)]="formData.category" name="category">
+                        <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Quantité</label>
+                    <input
+                            type="number"
+                            class="input"
+                            [(ngModel)]="formData.quantity"
+                            name="quantity"
+                            min="0"
+                            required>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Unité</label>
+                    <select class="input" [(ngModel)]="formData.unit" name="unit">
+                        <option value="unité(s)">unité(s)</option>
+                        <option value="paquet(s)">paquet(s)</option>
+                        <option value="bouteille(s)">bouteille(s)</option>
+                        <option value="boîte(s)">boîte(s)</option>
+                        <option value="kg">kg</option>
+                        <option value="L">L</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Seuil d'alerte</label>
+                    <input
+                            type="number"
+                            class="input"
+                            [(ngModel)]="formData.alertThreshold"
+                            name="alertThreshold"
+                            min="0"
+                            required>
+                </div>
+                <div class="form-group full-width">
+                    <label class="label">Notes (optionnel)</label>
+                    <textarea
+                            class="input"
+                            [(ngModel)]="formData.notes"
+                            name="notes"
+                            rows="3"
+                            placeholder="Ex: Marque préférée, magasin où acheter, remarques..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    {{ editingItem ? '💾 Modifier' : '➕ Ajouter' }}
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="closeForm()">
+                    ❌ Annuler
+                </button>
+            </div>
+        </form>
     </div>
 
-    <!-- Recherche et filtres -->
-    <div class="filters">
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input 
-          type="text" 
-          class="input search-input" 
-          placeholder="Rechercher un article..."
-          [(ngModel)]="searchTerm"
-          (ngModelChange)="onSearchChange()">
-      </div>
-      <select 
-        class="input filter-select" 
-        [(ngModel)]="filterCategory"
-        (ngModelChange)="onCategoryChange()">
-        <option value="all">Toutes les catégories</option>
-        <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-      </select>
+    <!-- Liste des articles -->
+    <div class="items-grid" *ngIf="filteredItems.length > 0">
+        <div
+                *ngFor="let item of filteredItems"
+                class="item-card"
+                [class.low-stock]="item.quantity <= item.alertThreshold">
+
+            <div class="item-header">
+                <div>
+                    <h3 class="item-name">{{ item.name }}</h3>
+                    <span class="badge badge-primary">{{ item.category }}</span>
+                </div>
+                <div class="item-actions">
+                    <button class="icon-btn edit-btn" (click)="openEditForm(item)" title="Modifier">
+                        ✏️
+                    </button>
+                    <button class="icon-btn delete-btn" (click)="deleteItem(item)" title="Supprimer">
+                        🗑️
+                    </button>
+                </div>
+            </div>
+
+            <div class="item-body">
+                <div class="quantity-display">
+                    <div class="quantity-value" [class.low]="item.quantity <= item.alertThreshold">
+                        {{ item.quantity }}
+                    </div>
+                    <div class="quantity-unit">{{ item.unit }}</div>
+                </div>
+
+                <div class="quantity-controls">
+                    <button class="btn-quantity btn-minus" (click)="adjustQuantity(item, -1)">
+                        ➖
+                    </button>
+                    <button class="btn-quantity btn-plus" (click)="adjustQuantity(item, 1)">
+                        ➕
+                    </button>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="item-notes" *ngIf="item.notes">
+                <div class="notes-label">📝 Notes :</div>
+                <div class="notes-content">{{ item.notes }}</div>
+            </div>
+
+            <!-- Alert stock faible -->
+            <div class="item-footer" *ngIf="item.quantity <= item.alertThreshold">
+                <div class="alert-badge">
+                    ⚠️ Stock faible (seuil: {{ item.alertThreshold }})
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Formulaire d'ajout/édition -->
-  <div class="card form-card" *ngIf="showAddForm">
-    <h3 class="form-title">{{ editingItem ? '✏️ Modifier' : '➕ Nouvel article' }}</h3>
-    
-    <form (ngSubmit)="saveItem()">
-      <div class="grid grid-cols-2">
-        <div class="form-group">
-          <label class="label">Nom</label>
-          <input 
-            type="text" 
-            class="input" 
-            [(ngModel)]="formData.name"
-            name="name"
-            placeholder="Ex: Papier toilette"
-            required>
-        </div>
-
-        <div class="form-group">
-          <label class="label">Catégorie</label>
-          <select class="input" [(ngModel)]="formData.category" name="category">
-            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label class="label">Quantité</label>
-          <input 
-            type="number" 
-            class="input" 
-            [(ngModel)]="formData.quantity"
-            name="quantity"
-            min="0"
-            required>
-        </div>
-
-        <div class="form-group">
-          <label class="label">Unité</label>
-          <select class="input" [(ngModel)]="formData.unit" name="unit">
-            <option value="unité(s)">unité(s)</option>
-            <option value="paquet(s)">paquet(s)</option>
-            <option value="bouteille(s)">bouteille(s)</option>
-            <option value="boîte(s)">boîte(s)</option>
-            <option value="kg">kg</option>
-            <option value="L">L</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label class="label">Seuil d'alerte</label>
-          <input 
-            type="number" 
-            class="input" 
-            [(ngModel)]="formData.alertThreshold"
-            name="alertThreshold"
-            min="0"
-            required>
-        </div>
-      </div>
-
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary">
-          {{ editingItem ? '💾 Modifier' : '➕ Ajouter' }}
-        </button>
-        <button type="button" class="btn btn-secondary" (click)="closeForm()">
-          ❌ Annuler
-        </button>
-      </div>
-    </form>
-  </div>
-
-  <!-- Liste des articles -->
-  <div class="items-grid" *ngIf="filteredItems.length > 0">
-    <div 
-      *ngFor="let item of filteredItems" 
-      class="item-card"
-      [class.low-stock]="item.quantity <= item.alertThreshold">
-      
-      <div class="item-header">
-        <div>
-          <h3 class="item-name">{{ item.name }}</h3>
-          <span class="badge badge-primary">{{ item.category }}</span>
-        </div>
-        <div class="item-actions">
-          <button class="icon-btn edit-btn" (click)="openEditForm(item)" title="Modifier">
-            ✏️
-          </button>
-          <button class="icon-btn delete-btn" (click)="deleteItem(item)" title="Supprimer">
-            🗑️
-          </button>
-        </div>
-      </div>
-
-      <div class="item-body">
-        <div class="quantity-display">
-          <div class="quantity-value" [class.low]="item.quantity <= item.alertThreshold">
-            {{ item.quantity }}
-          </div>
-          <div class="quantity-unit">{{ item.unit }}</div>
-        </div>
-
-        <div class="quantity-controls">
-          <button class="btn-quantity btn-minus" (click)="adjustQuantity(item, -1)">
-            ➖
-          </button>
-          <button class="btn-quantity btn-plus" (click)="adjustQuantity(item, 1)">
-            ➕
-          </button>
-        </div>
-      </div>
-
-      <div class="item-footer" *ngIf="item.quantity <= item.alertThreshold">
-        <div class="alert-badge">
-          ⚠️ Stock faible (seuil: {{ item.alertThreshold }})
-        </div>
-      </div>
+    <!-- Message si vide -->
+    <div class="card empty-state" *ngIf="filteredItems.length === 0">
+        <div class="empty-icon">📦</div>
+        <h3>{{ searchTerm || filterCategory !== 'all' ? 'Aucun article trouvé' : 'Aucun article dans votre stock' }}</h3>
+        <p>{{ searchTerm || filterCategory !== 'all' ? 'Essayez une autre recherche' : 'Commencez par ajouter vos premiers articles' }}</p>
     </div>
-  </div>
 
-  <!-- Message si vide -->
-  <div class="card empty-state" *ngIf="filteredItems.length === 0">
-    <div class="empty-icon">📦</div>
-    <h3>{{ searchTerm || filterCategory !== 'all' ? 'Aucun article trouvé' : 'Aucun article dans votre stock' }}</h3>
-    <p>{{ searchTerm || filterCategory !== 'all' ? 'Essayez une autre recherche' : 'Commencez par ajouter vos premiers articles' }}</p>
-  </div>
-
-  <!-- Statistiques -->
-  <div class="card stats-card" *ngIf="items.length > 0">
-    <h3 class="stats-title">📊 Statistiques</h3>
-    <div class="stats-grid">
-      <div class="stat-item">
-        <div class="stat-value stat-primary">{{ items.length }}</div>
-        <div class="stat-label">Articles</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value stat-success">{{ totalQuantity }}</div>
-        <div class="stat-label">Total unités</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value stat-warning">{{ lowStockItems.length }}</div>
-        <div class="stat-label">Alertes</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value stat-info">{{ categories.length }}</div>
-        <div class="stat-label">Catégories</div>
-      </div>
+    <!-- Statistiques -->
+    <div class="card stats-card" *ngIf="items.length > 0">
+        <h3 class="stats-title">📊 Statistiques</h3>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value stat-primary">{{ items.length }}</div>
+                <div class="stat-label">Articles</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value stat-success">{{ totalQuantity }}</div>
+                <div class="stat-label">Total unités</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value stat-warning">{{ lowStockItems.length }}</div>
+                <div class="stat-label">Alertes</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value stat-info">{{ categories.length }}</div>
+                <div class="stat-label">Catégories</div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
