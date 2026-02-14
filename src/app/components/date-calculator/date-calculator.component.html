@@ -18,12 +18,13 @@
             <div class="form-group">
                 <label class="label">Titre de l'événement</label>
                 <input
-                        type="text"
-                        class="input"
-                        [(ngModel)]="formData.title"
-                        name="title"
-                        placeholder="Ex: Notre rencontre, Déménagement..."
-                        required>
+                    #titleInput
+                    type="text"
+                    class="input"
+                    [(ngModel)]="formData.title"
+                    name="title"
+                    placeholder="Ex: Notre rencontre, Déménagement..."
+                    required>
             </div>
 
             <div class="form-group">

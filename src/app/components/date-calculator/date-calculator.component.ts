@@ -1,5 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DateService } from '../../services/date.service';
 import { DateEvent, DateCalculation } from '../../models/models';
@@ -12,6 +11,7 @@ import { DateEvent, DateCalculation } from '../../models/models';
   styleUrls: ['./date-calculator.component.css']
 })
 export class DateCalculatorComponent implements OnInit {
+  @ViewChild('titleInput') titleInput!: ElementRef;
   private dateService = inject(DateService);
 
   events: DateEvent[] = [];
@@ -36,6 +36,7 @@ export class DateCalculatorComponent implements OnInit {
     this.showAddForm = true;
     this.editingEvent = null;
     this.resetForm();
+    this.focusTitleInput();
   }
 
   openEditForm(event: DateEvent): void {
@@ -48,6 +49,7 @@ export class DateCalculatorComponent implements OnInit {
       period2Start: event.period2Start || '',
       useTwoPeriods: event.useTwoPeriods
     };
+    this.focusTitleInput();
   }
 
   closeForm(): void {
@@ -166,5 +168,13 @@ export class DateCalculatorComponent implements OnInit {
 
   getNextAnniversary(event: DateEvent): { date: Date; daysUntil: number; text: string } {
     return this.dateService.getNextAnniversary(event.period1Start);
+  }
+
+  private focusTitleInput(): void {
+    setTimeout(() => {
+      if (this.titleInput) {
+        this.titleInput.nativeElement.focus();
+      }
+    }, 100);
   }
 }
