@@ -166,8 +166,8 @@ export class DateCalculatorComponent implements OnInit {
     return new Date().toISOString().split('T')[0];
   }
 
-  getNextAnniversary(event: DateEvent): { date: Date; daysUntil: number; text: string } {
-    return this.dateService.getNextAnniversary(event.period1Start);
+  getNextAnniversary(event: DateEvent): { date: Date; daysUntil: number; text: string } | null {
+    return this.dateService.getNextAnniversary(event);
   }
 
   private focusTitleInput(): void {

@@ -141,22 +141,26 @@
                     </ng-container>
                 </div>
                 <!-- Prochain anniversaire -->
-                <div class="anniversary-info" *ngIf="getNextAnniversary(event) as anniversary">
-                    <div class="anniversary-icon">🎂</div>
-                    <div class="anniversary-content">
-                        <div class="anniversary-label">Prochain anniversaire</div>
-                        <div class="anniversary-date">{{ anniversary.text }}</div>
-                        <div class="anniversary-countdown" *ngIf="anniversary.daysUntil === 0">
-                            🎉 C'est aujourd'hui !
-                        </div>
-                        <div class="anniversary-countdown" *ngIf="anniversary.daysUntil === 1">
-                            ⏰ Demain !
-                        </div>
-                        <div class="anniversary-countdown" *ngIf="anniversary.daysUntil > 1">
-                            📅 Dans {{ anniversary.daysUntil }} jours
+                <ng-container *ngIf="getNextAnniversary(event) as anniversary">
+                    <div class="anniversary-info">
+                        <div class="anniversary-icon">🎂</div>
+                        <div class="anniversary-content">
+                            <div class="anniversary-label">
+                                {{ event.useTwoPeriods ? 'Prochaine année pleine' : 'Prochain anniversaire' }}
+                            </div>
+                            <div class="anniversary-date">{{ anniversary.text }}</div>
+                            <div class="anniversary-countdown" *ngIf="anniversary.daysUntil === 0">
+                                🎉 C'est aujourd'hui !
+                            </div>
+                            <div class="anniversary-countdown" *ngIf="anniversary.daysUntil === 1">
+                                ⏰ Demain !
+                            </div>
+                            <div class="anniversary-countdown" *ngIf="anniversary.daysUntil > 1">
+                                📅 Dans {{ anniversary.daysUntil }} jours
+                            </div>
                         </div>
                     </div>
-                </div>
+                </ng-container>
             </div>
         </div>
     </div>

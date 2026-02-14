@@ -98,41 +98,72 @@ export class DateService {
     };
   }
 
-  getNextAnniversary(startDate: string): { date: Date; daysUntil: number; text: string } {
-    const start = new Date(startDate);
+  getNextAnniversary(event: DateEvent): { date: Date; daysUntil: number; text: string } | null {
     const today = new Date();
 
-    // Date d'anniversaire cette année
-    let nextAnniversary = new Date(
-        today.getFullYear(),
-        start.getMonth(),
-        start.getDate()
-    );
+    if (!event.useTwoPeriods) {
+      // Mode simple : anniversaire basé sur period1Start
+      const start = new Date(event.period1Start);
 
-    // Si l'anniversaire est déjà passé cette année, prendre l'année prochaine
-    if (nextAnniversary < today) {
-      nextAnniversary = new Date(
-          today.getFullYear() + 1,
+      // Calculer l'anniversaire cette année
+      let nextAnniversary = new Date(
+          today.getFullYear(),
           start.getMonth(),
           start.getDate()
       );
+
+      // Si déjà passé, prendre l'année prochaine
+      if (nextAnniversary < today) {
+        nextAnniversary = new Date(
+            today.getFullYear() + 1,
+            start.getMonth(),
+            start.getDate()
+        );
+      }
+
+      const diffMs = nextAnniversary.getTime() - today.getTime();
+      const daysUntil = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+      const dateText = nextAnniversary.toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+
+      return { date: nextAnniversary, daysUntil, text: dateText };
+    } else {
+      // Mode 2 périodes : calculer quand on aura une année pleine de plus
+      if (!event.period1End || !event.period2Start) {
+        return null;
+      }
+
+      // Calculer le total actuel
+      const currentCalc = this.calculateTotalPeriods(
+          event.period1Start,
+          event.period1End,
+          event.period2Start
+      );
+
+      // Prochain anniversaire = dans (365 - jours depuis le dernier anniversaire) jours
+      const daysInYear = 365;
+      const daysSinceLastAnniversary = currentCalc.totalDays % daysInYear;
+      const daysUntilNext = daysInYear - daysSinceLastAnniversary;
+
+      // Date du prochain anniversaire
+      const nextAnniversary = new Date(today);
+      nextAnniversary.setDate(today.getDate() + daysUntilNext);
+
+      const dateText = nextAnniversary.toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+
+      return {
+        date: nextAnniversary,
+        daysUntil: daysUntilNext,
+        text: dateText
+      };
     }
-
-    // Calculer le nombre de jours jusqu'à l'anniversaire
-    const diffMs = nextAnniversary.getTime() - today.getTime();
-    const daysUntil = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-
-    // Texte formaté
-    const dateText = nextAnniversary.toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-
-    return {
-      date: nextAnniversary,
-      daysUntil,
-      text: dateText
-    };
   }
 }
