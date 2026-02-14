@@ -217,7 +217,6 @@ Pour votre usage : vous ne dépasserez JAMAIS ces limites !
 
 ## 🚀 Améliorations futures possibles
 
-- [ ] Authentification avec mot de passe
 - [ ] Export PDF/Excel du stock
 - [ ] Photos des produits
 - [ ] Notifications push

@@ -33,30 +33,36 @@ export class DateService {
     await deleteDoc(eventDoc);
   }
 
+  /**
+   * Calcule la différence entre deux dates de manière précise
+   */
   calculateDifference(startDate: string, endDate?: string): DateCalculation {
     const start = new Date(startDate);
     const end = endDate ? new Date(endDate) : new Date();
-    
+
     // Calculer la différence en millisecondes
     const diffMs = Math.abs(end.getTime() - start.getTime());
     const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    
-    // Calculer années, mois, jours
+
+    // Calculer années, mois, jours de manière précise
     let years = end.getFullYear() - start.getFullYear();
     let months = end.getMonth() - start.getMonth();
     let days = end.getDate() - start.getDate();
-    
+
+    // Ajuster si les jours sont négatifs
     if (days < 0) {
       months--;
+      // Prendre le nombre de jours du mois précédent
       const lastMonth = new Date(end.getFullYear(), end.getMonth(), 0);
       days += lastMonth.getDate();
     }
-    
+
+    // Ajuster si les mois sont négatifs
     if (months < 0) {
       years--;
       months += 12;
     }
-    
+
     return {
       years: Math.abs(years),
       months: Math.abs(months),
@@ -65,6 +71,10 @@ export class DateService {
     };
   }
 
+  /**
+   * Calcule le total de deux périodes en additionnant les jours
+   * puis en recalculant années/mois/jours de manière précise
+   */
   calculateTotalPeriods(
       period1Start: string,
       period1End: string,
@@ -81,25 +91,39 @@ export class DateService {
     // Période 2 (de period2Start à aujourd'hui)
     const calc2 = this.calculateDifference(period2Start);
 
-    // Additionner les jours
-    const totalDays = calc1.totalDays + calc2.totalDays;
+    // Total de jours exact
+    const totalDaysCount = calc1.totalDays + calc2.totalDays;
 
-    // Calculer années/mois/jours du total
-    const years = Math.floor(totalDays / 365);
-    const remainingDays = totalDays % 365;
-    const months = Math.floor(remainingDays / 30);
-    const days = remainingDays % 30;
+    // Calculer la date virtuelle en ajoutant tous les jours à period1Start
+    const virtualDate = this.addDaysToDate(period1Start, totalDaysCount);
+
+    // Calculer la différence entre period1Start et cette date virtuelle
+    // Cela donne le calcul précis en années/mois/jours
+    const preciseDiff = this.calculateDifference(period1Start, virtualDate.toISOString().split('T')[0]);
 
     return {
-      years,
-      months,
-      days,
-      totalDays
+      years: preciseDiff.years,
+      months: preciseDiff.months,
+      days: preciseDiff.days,
+      totalDays: totalDaysCount
     };
   }
 
+  /**
+   * Ajoute un nombre de jours à une date (gère les années bissextiles)
+   */
+  private addDaysToDate(dateString: string, daysToAdd: number): Date {
+    const date = new Date(dateString);
+    date.setDate(date.getDate() + daysToAdd);
+    return date;
+  }
+
+  /**
+   * Calcule la prochaine date d'anniversaire de manière ultra-précise
+   */
   getNextAnniversary(event: DateEvent): { date: Date; daysUntil: number; text: string } | null {
     const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time pour comparaison précise
 
     if (!event.useTwoPeriods) {
       // Mode simple : anniversaire basé sur period1Start
@@ -113,7 +137,7 @@ export class DateService {
       );
 
       // Si déjà passé, prendre l'année prochaine
-      if (nextAnniversary < today) {
+      if (nextAnniversary <= today) {
         nextAnniversary = new Date(
             today.getFullYear() + 1,
             start.getMonth(),
@@ -131,37 +155,66 @@ export class DateService {
       });
 
       return { date: nextAnniversary, daysUntil, text: dateText };
+
     } else {
-      // Mode 2 périodes : calculer quand on aura une année pleine de plus
+      // Mode 2 périodes : calcul ultra-précis
       if (!event.period1End || !event.period2Start) {
         return null;
       }
 
-      // Calculer le total actuel
+      // Calculer le total actuel de jours
       const currentCalc = this.calculateTotalPeriods(
           event.period1Start,
           event.period1End,
           event.period2Start
       );
 
-      // Prochain anniversaire = dans (365 - jours depuis le dernier anniversaire) jours
-      const daysInYear = 365;
-      const daysSinceLastAnniversary = currentCalc.totalDays % daysInYear;
-      const daysUntilNext = daysInYear - daysSinceLastAnniversary;
+      const totalDays = currentCalc.totalDays;
 
-      // Date du prochain anniversaire
-      const nextAnniversary = new Date(today);
-      nextAnniversary.setDate(today.getDate() + daysUntilNext);
+      // Date virtuelle = period1Start + totalDays
+      const virtualDate = this.addDaysToDate(event.period1Start, totalDays);
 
-      const dateText = nextAnniversary.toLocaleDateString('fr-FR', {
+      // Trouver le prochain anniversaire basé sur period1Start
+      const startDate = new Date(event.period1Start);
+      const virtualYear = virtualDate.getFullYear();
+
+      // Calculer l'anniversaire dans l'année virtuelle
+      let nextAnniversary = new Date(
+          virtualYear,
+          startDate.getMonth(),
+          startDate.getDate()
+      );
+
+      // Si l'anniversaire virtuel est déjà passé, prendre l'année suivante
+      if (nextAnniversary <= virtualDate) {
+        nextAnniversary = new Date(
+            virtualYear + 1,
+            startDate.getMonth(),
+            startDate.getDate()
+        );
+      }
+
+      // Calculer combien de jours entre virtualDate et nextAnniversary
+      const diffMs = nextAnniversary.getTime() - virtualDate.getTime();
+      const daysFromVirtualToAnniversary = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+      // La vraie date du prochain anniversaire = aujourd'hui + ces jours
+      const realNextAnniversary = this.addDaysToDate(
+          today.toISOString().split('T')[0],
+          daysFromVirtualToAnniversary
+      );
+
+      const daysUntil = daysFromVirtualToAnniversary;
+
+      const dateText = realNextAnniversary.toLocaleDateString('fr-FR', {
         day: 'numeric',
         month: 'long',
         year: 'numeric'
       });
 
       return {
-        date: nextAnniversary,
-        daysUntil: daysUntilNext,
+        date: realNextAnniversary,
+        daysUntil,
         text: dateText
       };
     }
