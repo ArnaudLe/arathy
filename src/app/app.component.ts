@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from './services/auth.service';
@@ -10,7 +10,7 @@ import { AuthService } from './services/auth.service';
   template: `
     <div class="app-container">
       <!-- En-tête -->
-      <header class="header" *ngIf="user$ | async">
+      <header class="header" *ngIf="user$ | async" [class.header-hidden]="!headerVisible">
         <div class="header-content">
           <h1 class="title">👫 Arathy</h1>
           <nav class="nav">
@@ -47,11 +47,34 @@ export class AppComponent {
 
   currentRoute: string = '';
   user$ = this.authService.isAuthenticated();
+  private lastScrollTop = 0;
+  headerVisible = true;
 
   constructor() {
     this.router.events.subscribe(() => {
       this.currentRoute = this.router.url;
     });
+  }
+
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+    // Sur mobile uniquement
+    if (window.innerWidth <= 768) {
+      if (scrollTop > this.lastScrollTop && scrollTop > 100) {
+        // Scroll vers le bas et au-delà de 100px
+        this.headerVisible = false;
+      } else {
+        // Scroll vers le haut ou en haut de page
+        this.headerVisible = true;
+      }
+    } else {
+      // Sur desktop, toujours visible
+      this.headerVisible = true;
+    }
+
+    this.lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
   }
 
   navigateTo(path: string): void {
