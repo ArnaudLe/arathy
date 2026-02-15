@@ -2,6 +2,45 @@
   min-height: 100vh;
 }
 
+/* ========== Écran de chargement ========== */
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  z-index: 9999;
+}
+
+.loading-spinner {
+  text-align: center;
+  color: white;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-spinner p {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* ========== Header commun ========== */
 .header {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
@@ -9,11 +48,11 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  transition: transform 0.3s ease;
 }
 
-.header-hidden {
-  transform: translateY(-100%);  /* ← Ajouter */
+/* ========== Header Desktop ========== */
+.header-desktop {
+  display: none;
 }
 
 .header-content {
@@ -23,7 +62,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
   gap: 1rem;
 }
 
@@ -64,42 +102,164 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
 .btn-logout {
   padding: 0.75rem 1.5rem;
 }
 
+/* ========== Header Mobile ========== */
+.header-mobile {
+  display: block;
+}
+
+.mobile-header-content {
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mobile-header-content .title {
+  font-size: 1.5rem;
+}
+
+/* ========== Bouton burger ========== */
+.burger-btn {
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: stretch;
+  position: relative;
+  z-index: 101;
+}
+
+.burger-btn span {
+  width: 100%;
+  height: 3px;
+  background: #667eea;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.burger-btn.active span:nth-child(1) {
+  transform: rotate(45deg) translateY(8px);
+}
+
+.burger-btn.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.burger-btn.active span:nth-child(3) {
+  transform: rotate(-45deg) translateY(-8px);
+}
+
+/* ========== Menu mobile overlay ========== */
+.mobile-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 98;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ========== Menu mobile ========== */
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  right: -280px;
+  width: 280px;
+  height: 100%;
+  background: white;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+  z-index: 99;
+  transition: right 0.3s ease;
+  padding-top: 80px;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-menu.open {
+  right: 0;
+}
+
+.mobile-nav-btn {
+  padding: 1.25rem 1.5rem;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #1f2937;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.mobile-nav-btn:hover {
+  background: #f9fafb;
+}
+
+.mobile-nav-btn.active {
+  background: #eef2ff;
+  color: #667eea;
+  border-left: 4px solid #667eea;
+}
+
+.mobile-nav-btn.logout {
+  margin-top: auto;
+  color: #ef4444;
+  border-bottom: none;
+  border-top: 1px solid #f3f4f6;
+}
+
+.mobile-nav-btn.logout:hover {
+  background: #fef2f2;
+}
+
+/* ========== Contenu principal ========== */
 .main-content {
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
 }
 
+/* ========== Media Queries ========== */
+
+/* Desktop : afficher header desktop */
+@media (min-width: 769px) {
+  .header-desktop {
+    display: block;
+  }
+
+  .header-mobile,
+  .mobile-menu,
+  .mobile-menu-overlay {
+    display: none !important;
+  }
+}
+
+/* Mobile : afficher header mobile */
 @media (max-width: 768px) {
-  .header-content {
-    padding: 1rem;
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .title {
-    font-size: 1.5rem;
-    text-align: center;
-  }
-
-  .nav {
-    width: 100%;
-  }
-
-  .nav-btn {
-    flex: 1;
-    padding: 0.75rem;
-    font-size: 0.9rem;
-  }
-
-  .btn-logout {
-    width: 100%;
-  }
-
   .main-content {
     padding: 1rem;
   }

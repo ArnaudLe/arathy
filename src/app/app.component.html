@@ -1,0 +1,75 @@
+<div class="app-container">
+    <!-- Écran de chargement -->
+    <div class="loading-screen" *ngIf="loading">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Chargement...</p>
+        </div>
+    </div>
+
+    <!-- Contenu normal -->
+    <ng-container *ngIf="!loading">
+        <!-- En-tête Desktop -->
+        <header class="header header-desktop" *ngIf="user$ | async">
+            <div class="header-content">
+                <h1 class="title">👫 Arathy</h1>
+                <nav class="nav">
+                    <button
+                            class="nav-btn"
+                            [class.active]="currentRoute === '/stock'"
+                            (click)="navigateTo('/stock')">
+                        📦 Stock
+                    </button>
+                    <button
+                            class="nav-btn"
+                            [class.active]="currentRoute === '/dates'"
+                            (click)="navigateTo('/dates')">
+                        📅 Dates
+                    </button>
+                </nav>
+                <div class="header-actions">
+                    <button class="btn btn-secondary btn-logout" (click)="logout()">
+                        🚪 Déconnexion
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- En-tête Mobile avec burger -->
+        <header class="header header-mobile" *ngIf="user$ | async">
+            <div class="mobile-header-content">
+                <h1 class="title">👫 Arathy</h1>
+                <button class="burger-btn" (click)="toggleMenu()" [class.active]="menuOpen">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Menu mobile (overlay) -->
+        <div class="mobile-menu-overlay" *ngIf="menuOpen" (click)="closeMenu()"></div>
+        <nav class="mobile-menu" [class.open]="menuOpen" *ngIf="user$ | async">
+            <button
+                    class="mobile-nav-btn"
+                    [class.active]="currentRoute === '/stock'"
+                    (click)="navigateTo('/stock')">
+                📦 Stock
+            </button>
+            <button
+                    class="mobile-nav-btn"
+                    [class.active]="currentRoute === '/dates'"
+                    (click)="navigateTo('/dates')">
+                📅 Dates
+            </button>
+            <button class="mobile-nav-btn logout" (click)="logout()">
+                🚪 Déconnexion
+            </button>
+        </nav>
+
+        <!-- Contenu -->
+        <main class="main-content">
+            <router-outlet></router-outlet>
+        </main>
+    </ng-container>
+</div>
