@@ -17,6 +17,7 @@ Application Angular avec Firebase pour gérer votre stock domestique et suivre v
 - Calculer le temps écoulé (années, mois, jours)
 - Mode 1 période (date → aujourd'hui) ou 2 périodes (date → date)
 - Cartes colorées et design moderne
+- Date du prochain anniversaire
 - **Synchronisation en temps réel entre appareils**
 
 ## 🚀 Installation et Configuration
@@ -268,7 +269,7 @@ arathy/
 
 ## 👥 Auteurs
 
-Arathy ❤️
+Claude AI / Arathy
 
 ## 🎉 Profitez-en !
 
